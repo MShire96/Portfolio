@@ -17,10 +17,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Put version tag into github environment
+      # Step 2: Extract branch name from GITHUB_REF and replace invalid characters and export that into github environment variable
       - name: Determine the version tags
         id: Version
-        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        run: |
+          VERSION_TAG=$(echo "${GITHUB_REF#refs/heads/}" | tr '/' '-')
+          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
 
       # Step 3: Build docker image with version tag
       - name: Build Docker Image
