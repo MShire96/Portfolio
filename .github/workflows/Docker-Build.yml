@@ -1,0 +1,43 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: My-Portfolio
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Put version tag into github environment
+      - name: Determine the version tags
+        id: Version
+        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      # Step 3: Build docker image with version tag
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }} .
+
+      # Step 4: Login to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      # Step 5: Push Docker image with version tag
+      - name: Push to Docker 
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
+
+      # Step 6: Push Docker image with latest tag
+      - name: Push to Docker image with latest tag
+        run: |
+          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }} ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+
