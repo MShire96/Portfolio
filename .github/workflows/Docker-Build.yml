@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: My-Portfolio
+  IMAGE_NAME: my-portfolio
 
 jobs:
   build-and-push:
